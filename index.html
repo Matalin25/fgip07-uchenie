@@ -1,0 +1,472 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Трекер обучения Маршрут">
+  <title>Маршрут — трекер обучения</title>
+  <style>
+:root {
+  font-family: Inter, "Noto Sans", system-ui, sans-serif;
+  font-synthesis: none;
+  color: #101827;
+  --page: #f5f7fb;
+  --paper: #fff;
+  --ink: #101827;
+  --muted: #586278;
+  --line: #e3e7ef;
+  --accent: #2d51d7;
+  --accent-deep: #2345be;
+  --soft: #e9efff;
+  --hero: #142a67;
+  --hero-hi: #304dd0;
+  --side: #fff;
+  --shadow: 0 4px 12px #17264508;
+}
+* { box-sizing: border-box; }
+body { margin: 0; min-width: 300px; background: var(--page); }
+body[data-project="school"] {
+  --page: #f6f7f3; --ink: #1c2921; --muted: #536257; --line: #dfe7df;
+  --accent: #14674c; --accent-deep: #0c563e; --soft: #e3f3e9;
+  --hero: #173a2d; --hero-hi: #236d4e; --side: #fbfdf9; color: var(--ink);
+}
+body[data-project="habit"] {
+  --page: #faf7f2; --ink: #2f2022; --muted: #695759; --line: #eee1db;
+  --accent: #a23847; --accent-deep: #8c2735; --soft: #f8e5e6;
+  --hero: #521e36; --hero-hi: #953f53; --side: #fffdf9; color: var(--ink);
+}
+button, input, select, textarea { font: inherit; }
+button { cursor: pointer; }
+button:disabled { cursor: default; opacity: .47; }
+button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+  outline: 3px solid var(--accent); outline-offset: 3px;
+}
+a { color: var(--accent-deep); }
+button, a { -webkit-tap-highlight-color: transparent; }
+[hidden] { display: none !important; }
+.shell { display: grid; grid-template-columns: 222px minmax(0,1fr); min-height: 100vh; }
+.side { background: var(--side); border-right: 1px solid var(--line); padding: 27px 17px; display: flex; flex-direction: column; gap: 26px; }
+.brand { display: flex; gap: 11px; align-items: center; padding-inline: 6px; }
+.mark { height: 39px; width: 39px; display: grid; place-items: center; border-radius: 12px; background: var(--accent); color: #fff; font-size: 18px; font-weight: 800; }
+.brand b, .brand small { display: block; }
+.brand b { font-size: 17px; line-height: 1.1; letter-spacing: -.025em; }
+.brand small { color: var(--muted); margin-top: 4px; font-size: 11px; }
+.side nav { display: flex; flex-direction: column; gap: 6px; }
+.navkey { display: flex; align-items: center; gap: 10px; text-align: left; border: 0; border-radius: 9px; padding: 11px 12px; color: var(--muted); background: transparent; font-size: 13px; font-weight: 600; min-height: 42px; }
+.navkey[aria-pressed="true"] { background: var(--soft); color: var(--accent-deep); font-weight: 750; }
+.navkey:hover { background: var(--soft); }
+.navkey i { font-style: normal; width: 17px; text-align: center; font-size: 15px; flex-shrink: 0; }
+.side-note { margin-top: auto; border-top: 1px solid var(--line); padding: 15px 7px 0; font-size: 12px; color: var(--muted); line-height: 1.5; }
+.workspace { min-width: 0; }
+.topbar { background: var(--paper); border-bottom: 1px solid var(--line); min-height: 66px; padding: 11px clamp(16px, 3vw, 42px); display: flex; justify-content: space-between; align-items: center; gap: 12px; font-size: 13px; color: var(--muted); }
+.topbar strong { color: var(--ink); font-weight: 650; }
+.top-actions { display: flex; align-items: center; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
+.wrap { max-width: 1450px; margin-inline: auto; padding: 27px clamp(16px, 3vw, 42px) 40px; }
+.hero { position: relative; isolation: isolate; overflow: hidden; display: flex; justify-content: space-between; align-items: center; gap: 20px; background: linear-gradient(108deg,var(--hero), var(--hero-hi)); color: #fff; border-radius: 17px; padding: 28px 30px; margin-bottom: 20px; min-height: 137px; }
+.hero::before, .hero::after { content: ""; position: absolute; z-index: -1; border: 1px solid #ffffff2a; border-radius: 36%; width: 260px; height: 260px; right: -40px; top: -154px; transform: rotate(35deg); pointer-events: none; }
+.hero::after { width: 325px; height: 325px; top: -160px; right: -53px; background: #ffffff07; }
+.hero h1 { margin: 0; font-size: clamp(28px, 3.5vw, 47px); line-height: 1.08; letter-spacing: -.04em; overflow-wrap: anywhere; }
+.hero p { margin: 9px 0 0; color: #ffffffeb; font-size: 14px; line-height: 1.5; }
+.hero .button { flex: 0 0 auto; color: var(--hero); background: #fff; border-color: #fff; }
+.hero .button:hover { background: #edf0fb; }
+.hero-value { min-width: 106px; padding: 12px 16px; border: 1px solid #ffffff43; border-radius: 13px; background: #ffffff12; text-align: right; }
+.hero-value b { font-size: 28px; display: block; font-variant-numeric: tabular-nums; }
+.hero-value span { font-size: 11px; }
+.stats { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 12px; margin-bottom: 24px; }
+.metric { background: var(--paper); min-width: 0; border: 1px solid var(--line); border-radius: 13px; padding: 13px 16px; box-shadow: var(--shadow); }
+.metric span { display: block; color: var(--muted); font-size: 12px; }
+.metric b { display: block; margin-top: 4px; font-size: 25px; letter-spacing: -.035em; font-variant-numeric: tabular-nums; color: var(--ink); }
+.metric small { display: block; margin-top: 3px; color: var(--muted); font-size: 11px; line-height: 1.35; }
+.section-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin: 0 0 13px; }
+.section-head h2 { margin: 0; font-size: 22px; line-height: 1.2; letter-spacing: -.027em; color: var(--ink); }
+.controls { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.controls input { width: min(100%, 170px); }
+.button, .control { min-height: 39px; border-radius: 8px; border: 1px solid var(--line); padding: 8px 11px; background: var(--paper); color: var(--ink); font-size: 13px; font-weight: 600; }
+.control { min-width: 0; font-weight: 500; }
+.button:hover { background: var(--soft); }
+.primary { background: var(--accent); color: white; border-color: var(--accent); }
+.primary:hover { background: var(--accent-deep); }
+.danger { color: #a2233a; }
+.tag { display: inline-flex; align-items: center; gap: 5px; padding: 4px 8px; border-radius: 20px; background: var(--soft); color: var(--accent-deep); font-size: 11px; font-weight: 700; white-space: nowrap; }
+.tag.hot { background: #ffebe8; color: #912c31; }
+.tag.ochre { background: #fff1dd; color: #784719; }
+.tag.good { background: #e2f3e7; color: #176040; }
+.tag.plain { background: #eef0f4; color: #485568; }
+.muted { color: var(--muted); }
+.board { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); align-items: start; gap: 13px; }
+.lane { border: 1px solid var(--line); border-radius: 13px; background: #edf0f6; padding: 11px; min-height: 170px; min-width: 0; }
+.lane-head { font-size: 13px; display: flex; align-items: center; gap: 8px; margin: 2px 2px 11px; font-weight: 700; }
+.lane-head .tag { margin-left: auto; }
+.dot { background: #66758e; width: 9px; height: 9px; display: inline-block; border-radius: 50%; flex-shrink: 0; }
+.lane[data-status="work"] .dot { background: #c07a2e; }
+.lane[data-status="done"] .dot { background: #298763; }
+.card { background: var(--paper); border: 1px solid var(--line); border-radius: 11px; padding: 12px; box-shadow: var(--shadow); }
+.card + .card { margin-top: 8px; }
+.card h3 { margin: 8px 0 6px; font-size: 14px; line-height: 1.35; overflow-wrap: anywhere; }
+.card p { margin: 0; line-height: 1.35; font-size: 12px; color: var(--muted); overflow-wrap: anywhere; }
+.card-top, .card-foot { display: flex; align-items: center; justify-content: space-between; gap: 6px; flex-wrap: wrap; }
+.card-foot { border-top: 1px solid var(--line); padding-top: 9px; margin-top: 12px; color: var(--muted); font-size: 11px; }
+.letter { width: 26px; height: 26px; border-radius: 100%; background: var(--soft); color: var(--accent-deep); display: inline-grid; place-items: center; font-weight: 750; font-size: 10px; }
+.empty { margin: 0; padding: 15px 6px; color: var(--muted); line-height: 1.4; font-size: 12px; }
+.card-title { border: 0; background: transparent; color: inherit; padding: 0; text-align: left; font-weight: 750; overflow-wrap: anywhere; }
+.card-title:hover { color: var(--accent-deep); text-decoration: underline; }
+.card h3 .card-title { font-size: inherit; }
+.panel { border: 1px solid var(--line); background: var(--paper); border-radius: 14px; box-shadow: var(--shadow); overflow: hidden; }
+.panel-title { padding: 15px 17px 11px; margin: 0; font-size: 16px; }
+.rows { list-style: none; margin: 0; padding: 0; }
+.row { padding: 13px 17px; display: flex; justify-content: space-between; align-items: center; gap: 12px; border-top: 1px solid var(--line); min-height: 65px; }
+.row-item { display: flex; align-items: center; gap: 11px; min-width: 0; }
+.row strong, .row small { display: block; overflow-wrap: anywhere; }
+.row strong { font-size: 14px; }
+.row small { color: var(--muted); font-size: 12px; margin-top: 4px; }
+.row-end { flex-shrink: 0; display: flex; gap: 8px; align-items: center; }
+.unit { width: 32px; height: 32px; border-radius: 9px; display: grid; place-items: center; background: var(--soft); color: var(--accent-deep); font-size: 12px; font-weight: 750; flex-shrink: 0; }
+.split { display: grid; grid-template-columns: minmax(0,1.9fr) minmax(0,1fr); gap: 13px; align-items: start; }
+.pad { padding: 15px 17px; }
+.pad h3 { margin: 0 0 12px; font-size: 16px; }
+.pad p { color: var(--muted); font-size: 13px; line-height: 1.5; margin: 8px 0; }
+.progress { height: 8px; overflow: hidden; border-radius: 10px; background: var(--soft); margin-block: 10px; }
+.progress span { display: block; height: 100%; background: var(--accent); border-radius: inherit; }
+.habits .row { min-height: 75px; }
+.tick { min-width: 42px; min-height: 42px; border: 1px solid var(--line); border-radius: 10px; background: var(--paper); color: var(--ink); font-weight: 800; }
+.tick[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: white; }
+.week { display: grid; grid-template-columns: repeat(7,minmax(0,1fr)); gap: 5px; margin-top: 14px; }
+.day-cell { display: grid; gap: 5px; justify-items: center; color: var(--muted); font-size: 10px; }
+.day-cell i { display: inline-block; width: 100%; height: 29px; border-radius: 5px; background: var(--soft); }
+.day-cell i.hit { background: var(--accent); }
+.day-cell.current { color: var(--accent-deep); font-weight: 800; }
+.role { display: inline-flex; align-items: center; gap: 6px; }
+.role small { font-size: 11px; white-space: nowrap; }
+dialog { width: min(100% - 26px, 535px); padding: 0; border: 1px solid var(--line); border-radius: 16px; background: var(--paper); color: var(--ink); box-shadow: 0 18px 62px #17213b38; max-height: calc(100% - 24px); overflow: auto; }
+dialog::backdrop { background: #11182766; }
+.form { padding: 22px; }
+.form header { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 14px; }
+.form header h2 { font-size: 22px; margin: 0; letter-spacing: -.03em; }
+.form label { display: grid; gap: 5px; margin-bottom: 10px; font-size: 13px; font-weight: 650; min-width: 0; }
+.form .control { width: 100%; }
+.form textarea { min-height: 86px; resize: vertical; }
+.form-cols { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 9px; }
+.form-foot { display: flex; justify-content: flex-end; align-items: center; flex-wrap: wrap; gap: 7px; margin-top: 16px; }
+.form-foot .danger { margin-right: auto; }
+.form-error { color: #953045; font-size: 13px; min-height: 17px; margin: 5px 0 0; }
+.toast { position: fixed; z-index: 2; right: 16px; bottom: 16px; max-width: calc(100% - 32px); margin: 0; padding: 9px 13px; border-radius: 8px; background: var(--ink); color: white; font-size: 13px; box-shadow: var(--shadow); }
+body[data-version="first"] .side { gap: 16px; }
+body[data-version="first"] .hero { background: white; color: var(--ink); border: 1px solid var(--line); min-height: 105px; padding-block: 18px; }
+body[data-version="first"] .hero p { color: var(--muted); }
+body[data-version="first"] .hero::before, body[data-version="first"] .hero::after { display: none; }
+body[data-version="first"] .hero .button { color: white; background: var(--accent); }
+body[data-version="first"] .hero-value { color: var(--ink); border-color: var(--line); }
+@media (max-width: 1040px) {
+  .shell { grid-template-columns: 168px minmax(0,1fr); }
+  .side { padding-inline: 11px; }
+  .wrap, .topbar { padding-inline: 19px; }
+}
+@media (max-width: 790px) {
+  .shell { display: block; }
+  .side { display: flex; flex-direction: row; align-items: center; gap: 10px; justify-content: space-between; padding: 10px 15px; border-right: 0; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
+  .brand { padding-inline: 0; }
+  .side nav { flex-direction: row; gap: 3px; }
+  .navkey { gap: 4px; padding: 7px; min-height: 35px; }
+  .side-note { display: none; }
+  .topbar { min-height: 49px; }
+  .wrap { padding-top: 15px; }
+  .board { grid-template-columns: 1fr; }
+}
+@media (max-width: 560px) {
+  .wrap, .topbar { padding-inline: 13px; }
+  .hero { padding: 18px; min-height: 120px; }
+  .hero h1 { font-size: 29px; }
+  .hero p { font-size: 12px; }
+  .hero-value { min-width: 69px; padding: 8px; }
+  .hero-value b { font-size: 23px; }
+  .hero .button { font-size: 12px; max-width: 100px; padding-inline: 7px; }
+  .stats { gap: 6px; margin-bottom: 18px; }
+  .metric { padding: 9px; }
+  .metric span { line-height: 1.1; font-size: 11px; }
+  .metric b { font-size: 21px; }
+  .split { grid-template-columns: 1fr; }
+  .controls { width: 100%; }
+  .controls input { flex: 1 0 100%; width: 100%; }
+  .controls select { flex: 1 1 0%; }
+  .row { padding-inline: 11px; }
+  .row-end { gap: 5px; }
+  .row-end .button { padding-inline: 7px; }
+}
+.date-controls input { width: 145px; }
+.pad select { max-width: 100%; }
+@media (max-width: 560px) {
+  .date-controls { flex-wrap: nowrap; width: auto; }
+  .date-controls input { flex: 0 1 145px; width: 145px; }
+  .row-end { align-items: flex-end; flex-wrap: wrap; justify-content: flex-end; }
+  .row { gap: 8px; }
+}
+@media (max-width: 360px) {
+  .row .unit { display: none; }
+  .hero .button { max-width: 90px; white-space: normal; }
+}
+
+  </style>
+</head>
+<body data-project="school" data-version="final">
+  <div class="shell">
+    <aside class="side">
+      <div class="brand"><span class="mark" aria-hidden="true">М</span><div><b>Маршрут</b><small>Трекер обучения</small></div></div>
+      <nav aria-label="Разделы приложения"></nav>
+      <div class="side-note">Демо-данные и изменения хранятся в этом браузере.</div>
+    </aside>
+    <div class="workspace">
+      <header class="topbar"><div data-heading></div><div class="top-actions"></div></header>
+      <main class="wrap"></main>
+    </div>
+  </div>
+  <dialog></dialog>
+  <p class="toast" role="status" hidden></p>
+  <script>
+const root = document.querySelector('main');
+const dialog = document.querySelector('dialog');
+const toastElement = document.querySelector('[role="status"]');
+const first = document.body.dataset.version === 'first';
+const version = first ? 'first' : 'final';
+let toastTimeout;
+
+function escapeHtml(value) {
+  const escaped = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
+  return String(value ?? '').replace(/[&<>"']/g, char => escaped[char]);
+}
+
+function storage(key, seed) {
+  const name = 'fgip07:' + version + ':' + key;
+  let state;
+  try {
+    const saved = localStorage.getItem(name);
+    state = saved ? JSON.parse(saved) : seed();
+  } catch {
+    state = seed();
+  }
+  return {
+    state,
+    save() {
+      try {
+        localStorage.setItem(name, JSON.stringify(state));
+      } catch {
+        notify('Браузер запретил сохранение. Изменения доступны до закрытия страницы.');
+      }
+    }
+  };
+}
+
+function dateKey(date = new Date(), offset = 0) {
+  const day = new Date(date);
+  day.setDate(day.getDate() + offset);
+  return [day.getFullYear(), day.getMonth() + 1, day.getDate()]
+    .map((value, index) => String(value).padStart(index ? 2 : 4, '0')).join('-');
+}
+
+function formatDate(key) {
+  return new Intl.DateTimeFormat('ru-RU', { day: 'numeric', month: 'short' })
+    .format(new Date(key + 'T12:00:00')).replace('.', '');
+}
+
+function newId() {
+  return globalThis.crypto?.randomUUID?.() ?? Date.now().toString(36) + Math.random().toString(36).slice(2);
+}
+
+function notify(message) {
+  toastElement.textContent = message;
+  toastElement.hidden = false;
+  clearTimeout(toastTimeout);
+  toastTimeout = setTimeout(() => { toastElement.hidden = true; }, 4000);
+}
+
+function nav(list, active) {
+  document.querySelector('nav').innerHTML = list.map(([key, symbol, label]) =>
+    '<button type="button" class="navkey" data-view="' + key + '" aria-pressed="' + (key === active) +
+    '"><i aria-hidden="true">' + symbol + '</i>' + label + '</button>').join('');
+}
+
+function metrics(list) {
+  return '<div class="stats">' + list.map(([label, value, detail]) =>
+    '<div class="metric"><span>' + label + '</span><b>' + value + '</b><small>' + detail + '</small></div>'
+  ).join('') + '</div>';
+}
+
+function options(values, selected) {
+  return values.map(([value, label]) => '<option value="' + escapeHtml(value) + '"' +
+    (value === selected ? ' selected' : '') + '>' + escapeHtml(label) + '</option>').join('');
+}
+
+function openDialog(title, fields, actions, submit) {
+  dialog.innerHTML = '<form class="form"><header><h2 id="dialog-title">' + title +
+    '</h2><button type="button" class="button" aria-label="Закрыть окно" data-close>×</button></header>' +
+    fields + '<p class="form-error" role="alert"></p><div class="form-foot">' + actions + '</div></form>';
+  dialog.setAttribute('aria-labelledby', 'dialog-title');
+  const form = dialog.querySelector('form');
+  const error = dialog.querySelector('[role="alert"]');
+  dialog.querySelector('[data-close]').onclick = () => dialog.close();
+  form.onsubmit = event => {
+    event.preventDefault();
+    error.textContent = '';
+    const message = submit?.(new FormData(form), event.submitter?.value);
+    if (message) error.textContent = message;
+  };
+  dialog.showModal();
+}
+
+function putTop(text, actions = '') {
+  document.querySelector('[data-heading]').innerHTML = text;
+  document.querySelector('.top-actions').innerHTML = actions;
+}
+
+const modules = [
+  { id: 'u1', name: 'Первые шаги в Python', block: 'Основы', material: 'Напишите программу, которая спрашивает имя пользователя и печатает приветствие. Проверьте её на двух разных именах.' },
+  { id: 'u2', name: 'Условия и ветвления', block: 'Основы', material: 'Напишите функцию, которая принимает целое число и возвращает «чётное» или «нечётное». Проверьте ноль и отрицательное число.' },
+  { id: 'u3', name: 'Циклы и списки', block: 'Практика', material: 'Найдите сумму чётных элементов списка. Затем измените решение так, чтобы оно возвращало ноль для пустого списка.' },
+  { id: 'u4', name: 'Функции и аргументы', block: 'Практика', material: 'Вынесите расчёт скидки в функцию. Добавьте значения по умолчанию и тест для неверного аргумента.' },
+  { id: 'u5', name: 'Мини-проект', block: 'Итог', material: 'Соберите консольный список задач. Реализуйте добавление записи и отметку о выполнении. Опишите, как запустить программу.' }
+];
+const students = { daria: 'Дарья Волкова', ilya: 'Илья Орлов', sofia: 'София Ким' };
+const statusMap = {
+  start: ['К изучению','plain'], review: ['На проверке','ochre'],
+  revise: ['Доработать','hot'], passed: ['Принято','good']
+};
+const model = storage('school', () => {
+  const items = Object.fromEntries(Object.keys(students).map(id => [
+    id, Object.fromEntries(modules.map(item => [item.id, { status: 'start', answer: '', feedback: '' }]))
+  ]));
+  Object.assign(items.daria.u1, { status: 'passed', answer: 'Сделала приветствие через input().', feedback: 'Задание принято, оба теста описаны.' });
+  Object.assign(items.daria.u2, { status: 'passed', answer: 'Добавила проверку остатка от деления.', feedback: 'Граничные примеры учтены.' });
+  Object.assign(items.daria.u3, { status: 'review', answer: 'Сумма через цикл и фильтр чётных чисел.' });
+  Object.assign(items.ilya.u1, { status: 'review', answer: 'Отправляю решение, проверил на двух именах.' });
+  Object.assign(items.sofia.u1, { status: 'passed', answer: 'Переменная name и вывод print().', feedback: 'Принято.' });
+  return { items };
+});
+const items = model.state.items;
+const navigation = [['course','▤','Учебный план'], ['queue','≡','На проверке']];
+let role = 'student';
+let student = 'daria';
+let view = 'course';
+
+function counts(id) {
+  const results = Object.values(items[id]);
+  const accepted = results.filter(result => result.status === 'passed').length;
+  const waiting = results.filter(result => result.status === 'review').length;
+  return { accepted, waiting, percentage: Math.round(accepted / modules.length * 100) };
+}
+
+function statusTag(status) {
+  const [label, style] = statusMap[status];
+  return `<span class="tag ${style}">${label}</span>`;
+}
+
+function queue() {
+  return Object.keys(students).flatMap(id => modules.filter(module => items[id][module.id].status === 'review')
+    .map(module => [id, module]));
+}
+
+function render() {
+  nav(role === 'teacher' ? navigation : navigation.slice(0,1), view);
+  putTop('Программа / <strong>Python с нуля</strong>', `
+    <label class="role"><small>Демо-роль</small><select class="control" aria-label="Демо-роль" data-role>
+      ${options([['student','Ученик'],['teacher','Куратор']], role)}</select></label>
+    ${role === 'teacher' && view === 'course' ? `<select class="control" aria-label="Ученик" data-student>${options(Object.entries(students), student)}</select>` : ''}`);
+  const summary = counts(student);
+  const pending = queue();
+  root.innerHTML = `
+    <section class="hero"><div><h1>${role === 'teacher' ? 'Кабинет куратора' : 'Мой учебный план'}</h1>
+    <p>${role === 'teacher' ? 'Проверка работ и прогресс учеников.' : 'Python с нуля · ' + students[student]}</p></div>
+    <div class="hero-value"><b>${role === 'teacher' && view === 'queue' ? pending.length : summary.percentage + '%'}</b><span>${role === 'teacher' && view === 'queue' ? 'работ на проверке' : 'прогресс курса'}</span></div></section>
+    ${metrics([['В программе', modules.length, 'Задания курса'], ['Принято', summary.accepted, students[student]], ['На проверке', role === 'teacher' ? pending.length : summary.waiting, role === 'teacher' ? 'У всей группы' : 'Ожидают куратора']])}
+    ${view === 'queue' && role === 'teacher' ? renderQueue(pending) : renderPlan(summary)}`;
+}
+
+function renderPlan(summary) {
+  const active = role === 'student' ? 'Открыть' : 'Подробнее';
+  const rows = modules.map((module, index) => {
+    const result = items[student][module.id];
+    return `<li class="row"><div class="row-item"><span class="unit" aria-hidden="true">${index + 1}</span>
+      <div><strong>${module.name}</strong><small>${module.block}${result.feedback ? ' · Есть комментарий' : ''}</small></div></div>
+      <div class="row-end">${statusTag(result.status)}<button type="button" class="button" data-module="${module.id}" data-for="${student}" aria-label="${active}: ${module.name}">${active}</button></div></li>`;
+  }).join('');
+  return `<div class="section-head"><h2>Задания курса</h2></div><div class="split">
+    <div class="panel"><h3 class="panel-title">Python с нуля</h3><ul class="rows">${rows}</ul></div>
+    <aside class="panel pad"><h3>Прогресс ученика</h3>
+    <strong data-progress>${summary.accepted} из ${modules.length}</strong><div class="progress" role="progressbar" aria-label="Завершение курса" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${summary.percentage}"><span style="width:${summary.percentage}%"></span></div>
+    <p>Прогресс учитывает работы, принятые куратором.</p>
+    </aside></div>`;
+}
+
+function renderQueue(pending) {
+  return `<div class="section-head"><h2>Очередь проверки</h2></div><div class="panel">
+    <h3 class="panel-title">Сданные задания</h3><ul class="rows">${pending.map(([id,module]) => `<li class="row">
+      <div class="row-item"><span class="unit" aria-hidden="true">${students[id].slice(0,1)}</span>
+      <div><strong>${module.name}</strong><small>${students[id]}</small></div></div>
+      <button type="button" class="button primary" data-module="${module.id}" data-for="${id}" aria-label="Проверить: ${module.name} — ${students[id]}">Проверить</button></li>`).join('') || '<li class="empty">Все работы проверены.</li>'}</ul></div>`;
+}
+
+function showModule(module, id) {
+  if (!module || !items[id] || (role === 'student' && id !== student)) return;
+  const result = items[id][module.id];
+  const editable = role === 'student' && ['start','revise'].includes(result.status);
+  const reviewing = role === 'teacher' && result.status === 'review';
+  const action = editable ? '<button type="submit" class="button primary" value="send">Сдать задание</button>' :
+    reviewing ? '<button type="submit" class="button" value="revise">На доработку</button><button type="submit" class="button primary" value="passed">Принять</button>' : '';
+  openDialog(module.name, `
+    <p class="muted">${escapeHtml(module.material)}</p>
+    <p>${statusTag(result.status)}</p>
+    ${editable ? `<label>Ответ<textarea name="answer" class="control" maxlength="700" required>${escapeHtml(result.answer)}</textarea></label>`
+       : result.answer ? `<p><strong>Ответ ученика</strong></p><p class="muted" style="overflow-wrap:anywhere">${escapeHtml(result.answer)}</p>` : ''}
+    ${reviewing ? `<label>Комментарий куратора (для возврата обязателен)<textarea name="feedback" class="control" maxlength="400">${escapeHtml(result.feedback)}</textarea></label>`
+       : result.feedback ? `<p><strong>Комментарий куратора</strong></p><p class="muted" style="overflow-wrap:anywhere">${escapeHtml(result.feedback)}</p>` : ''}
+    ${result.previousFeedback && !result.feedback ? `<p><strong>Предыдущий комментарий куратора</strong></p><p class="muted" style="overflow-wrap:anywhere">${escapeHtml(result.previousFeedback)}</p>` : ''}`,
+    '<button class="button" type="button" data-close-form>Закрыть</button>' + action,
+    (fields, outcome) => {
+      if (outcome === 'send' && editable && role === 'student') {
+        const answer = fields.get('answer').trim();
+        if (!answer) return 'Введите ответ перед отправкой.';
+        if (result.feedback) result.previousFeedback = result.feedback;
+        Object.assign(result, { status: 'review', answer, feedback: '' });
+      } else if (reviewing && role === 'teacher' && ['revise','passed'].includes(outcome)) {
+        const feedback = fields.get('feedback').trim();
+        if (outcome === 'revise' && !feedback) return 'Укажите, что нужно доработать.';
+        Object.assign(result, { status: outcome, feedback });
+      } else {
+        return 'Это действие недоступно в текущей роли.';
+      }
+      model.save();
+      dialog.close();
+      render();
+      notify(outcome === 'send' ? 'Работа отправлена куратору' : 'Решение сохранено');
+    });
+  dialog.querySelector('[data-close-form]').onclick = () => dialog.close();
+}
+
+document.addEventListener('click', event => {
+  const button = event.target.closest('button');
+  if (!button) return;
+  if (button.dataset.view) {
+    view = button.dataset.view;
+    render();
+    document.querySelector('[data-view="' + view + '"]').focus();
+  }
+  if (button.dataset.module) showModule(modules.find(module => module.id === button.dataset.module), button.dataset.for);
+});
+document.addEventListener('change', event => {
+  const target = event.target;
+  if (target.hasAttribute('data-role')) {
+    role = target.value;
+    if (role === 'student') student = 'daria';
+    view = role === 'teacher' ? 'queue' : 'course';
+    render();
+    document.querySelector('[data-role]').focus();
+  }
+  if (target.hasAttribute('data-student') && role === 'teacher') {
+    student = target.value;
+    render();
+    document.querySelector('[data-student]').focus();
+  }
+});
+render();
+
+  </script>
+</body>
+</html>
